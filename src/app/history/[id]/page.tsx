@@ -1,18 +1,27 @@
 import dynamic from 'next/dynamic';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
-import { loadRequestHistory } from '@/app/actions/request-history';
+import { loadRequestHistoryItem } from '@/app/actions/request-history';
 import { HistoryLoading } from '@/components/history/history-loading';
 import { createClient } from '@/lib/supabase/server';
 
-const HistoryPanel = dynamic(
-    () => import('@/components/history/history-panel'),
+const HistoryDetailPanel = dynamic(
+    () => import('@/components/history/history-detail-panel'),
     {
         loading: () => <HistoryLoading />,
     },
 );
 
-export default async function HistoryPage() {
+type HistoryDetailPageProps = {
+    params: Promise<{
+        id: string;
+    }>;
+};
+
+export default async function HistoryDetailPage({
+    params,
+}: HistoryDetailPageProps) {
+    const { id } = await params;
     const supabase = await createClient();
     const {
         data: { user },
@@ -22,7 +31,11 @@ export default async function HistoryPage() {
         redirect('/');
     }
 
-    const items = await loadRequestHistory();
+    const item = await loadRequestHistoryItem(id);
+
+    if (!item) {
+        notFound();
+    }
 
     return (
         <section className="flex flex-1">
@@ -32,15 +45,15 @@ export default async function HistoryPage() {
                         History & Analytics
                     </p>
                     <h1 className="mt-3 bg-gradient-to-r from-cyan-200 to-fuchsia-300 bg-clip-text text-4xl font-black text-transparent">
-                        Request History
+                        Request Analytics
                     </h1>
                     <p className="mt-4 max-w-2xl text-cyan-100/70">
-                        Review executed API requests, response statuses,
-                        duration, and error details.
+                        Detailed metrics and payloads for a single executed
+                        request.
                     </p>
                 </div>
 
-                <HistoryPanel items={items} />
+                <HistoryDetailPanel item={item} />
             </div>
         </section>
     );

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+import { recordRequestHistory } from '@/lib/history/record-request';
+
 type ProxyRequestBody = {
     url?: string;
     method?: string;
@@ -16,21 +18,35 @@ export async function POST(request: Request) {
     }
 
     const startedAt = Date.now();
+    const normalizedMethod = method.toUpperCase();
 
     try {
         const response = await fetch(url, {
-            method: method.toUpperCase(),
+            method: normalizedMethod,
             headers,
-            body: ['GET', 'HEAD'].includes(method.toUpperCase())
+            body: ['GET', 'HEAD'].includes(normalizedMethod)
                 ? undefined
                 : requestBody,
         });
 
         const text = await response.text();
         const responseHeaders: Record<string, string> = {};
+        const durationMs = Date.now() - startedAt;
 
         response.headers.forEach((value, key) => {
             responseHeaders[key] = value;
+        });
+
+        await recordRequestHistory({
+            method: normalizedMethod,
+            url,
+            headers,
+            body: requestBody,
+            status: response.status,
+            durationMs,
+            statusText: response.statusText,
+            responseHeaders,
+            responseBody: text,
         });
 
         return NextResponse.json({
@@ -39,14 +55,27 @@ export async function POST(request: Request) {
             statusText: response.statusText,
             headers: responseHeaders,
             body: text,
-            durationMs: Date.now() - startedAt,
+            durationMs,
         });
     } catch (error) {
+        const durationMs = Date.now() - startedAt;
+        const message =
+            error instanceof Error ? error.message : 'Request failed';
+
+        await recordRequestHistory({
+            method: normalizedMethod,
+            url,
+            headers,
+            body: requestBody,
+            status: null,
+            durationMs,
+            proxyError: message,
+        });
+
         return NextResponse.json(
             {
-                error:
-                    error instanceof Error ? error.message : 'Request failed',
-                durationMs: Date.now() - startedAt,
+                error: message,
+                durationMs,
             },
             { status: 502 },
         );

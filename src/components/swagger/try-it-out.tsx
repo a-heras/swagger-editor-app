@@ -222,6 +222,7 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
             try {
                 const proxyResponse = await fetch('/api/proxy', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                     },
