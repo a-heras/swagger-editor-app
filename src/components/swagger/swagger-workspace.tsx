@@ -7,7 +7,7 @@ import { saveSchema } from '@/app/actions/schema';
 import { SchemaEditor } from './schema-editor';
 import { SchemaViewer } from './schema-viewer';
 
-import { extractEndpoints } from '@/lib/openapi/endpoints';
+import { extractEndpoints, getBaseUrl } from '@/lib/openapi/endpoints';
 import { convertSchemaFormat, parseSchema } from '@/lib/openapi/schema-parser';
 import type { SchemaFormat } from '@/lib/openapi/types';
 
@@ -15,6 +15,8 @@ const defaultSchema = `openapi: 3.0.0
 info:
     title: Example API
     version: 1.0.0
+servers:
+    - url: https://jsonplaceholder.typicode.com
 paths:
     /users:
         get:
@@ -50,6 +52,7 @@ export function SwaggerWorkspace({ initialSchema }: SwaggerWorkspaceProps) {
 
     const format = parsedSchema.ok ? parsedSchema.format : parsedSchema.format;
     const error = parsedSchema.ok ? undefined : parsedSchema.error;
+    const baseUrl = parsedSchema.ok ? getBaseUrl(parsedSchema.document) : '';
 
     function handleToggleFormat() {
         if (!format) {
@@ -85,7 +88,7 @@ export function SwaggerWorkspace({ initialSchema }: SwaggerWorkspaceProps) {
                 onToggleFormat={handleToggleFormat}
                 onSave={handleSaveSchema}
             />
-            <SchemaViewer endpoints={endpoints} />
+            <SchemaViewer endpoints={endpoints} baseUrl={baseUrl} />
         </div>
     );
 }

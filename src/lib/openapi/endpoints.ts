@@ -15,6 +15,22 @@ function isHttpMethod(method: string): method is HttpMethod {
     return httpMethods.includes(method as HttpMethod);
 }
 
+export function getBaseUrl(document: OpenApiDocument): string {
+    const serverUrl = document.servers?.[0]?.url?.trim();
+    if (serverUrl) {
+        return serverUrl;
+    }
+
+    const host = document.host?.trim();
+    if (host) {
+        const scheme = document.schemes?.[0] ?? 'https';
+        const basePath = document.basePath ?? '';
+        return `${scheme}://${host}${basePath}`;
+    }
+
+    return '';
+}
+
 export function extractEndpoints(document: OpenApiDocument): ApiEndpoint[] {
     if (!document.paths) {
         return [];
