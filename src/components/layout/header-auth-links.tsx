@@ -11,11 +11,11 @@ type HeaderAuthLinksProps = {
 };
 
 const inactiveLinkClassName =
-    'cursor-pointer rounded-md px-2.5 py-1.5 text-xs font-semibold text-cyan-100/70 transition hover:text-cyan-300';
+    'cursor-pointer rounded-md px-3 py-2 text-sm font-semibold text-cyan-100/70 transition hover:text-cyan-300';
 const activeLinkClassName =
-    'rounded-md bg-gradient-to-r from-cyan-300 to-fuchsia-400 px-2.5 py-1.5 text-xs font-bold text-slate-950 shadow-[0_0_14px_rgba(34,211,238,0.28)]';
+    'rounded-md bg-gradient-to-r from-cyan-300 to-fuchsia-400 px-3 py-2 text-sm font-bold text-slate-950 shadow-[0_0_14px_rgba(34,211,238,0.28)]';
 const primaryLinkClassName =
-    'rounded-md bg-gradient-to-r from-cyan-300 to-fuchsia-400 px-2.5 py-1.5 text-xs font-bold text-slate-950 shadow-[0_0_14px_rgba(34,211,238,0.28)] transition hover:scale-105';
+    'rounded-md bg-gradient-to-r from-cyan-300 to-fuchsia-400 px-3 py-2 text-sm font-bold text-slate-950 shadow-[0_0_14px_rgba(34,211,238,0.28)] transition hover:scale-105';
 const activePrimaryLinkClassName = activeLinkClassName;
 
 export function HeaderAuthLinks({ isAuthenticated }: HeaderAuthLinksProps) {

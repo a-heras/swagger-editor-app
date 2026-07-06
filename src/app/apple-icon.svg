@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Swagger Editor App">
+    <defs>
+        <linearGradient id="swagger-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#67e8f9" />
+            <stop offset="55%" stop-color="#e879f9" />
+            <stop offset="100%" stop-color="#fde68a" />
+        </linearGradient>
+    </defs>
+    <rect width="180" height="180" rx="40" fill="#050816" />
+    <rect
+        x="8"
+        y="8"
+        width="164"
+        height="164"
+        rx="34"
+        fill="none"
+        stroke="url(#swagger-gradient)"
+        stroke-width="8"
+        opacity="0.85"
+    />
+    <path
+        d="M56 64c0-6.8 5.6-11.2 13.4-11.2h40.2c10 0 17.4 5.6 17.4 13.6 0 6.2-3.8 10.8-10 12.8l-26.8 9c-5.6 2-8.4 5-8.4 10.2 0 6.2 5 10.8 12.2 10.8h35.6"
+        fill="none"
+        stroke="url(#swagger-gradient)"
+        stroke-width="12"
+        stroke-linecap="round"
+    />
+    <circle cx="126" cy="116" r="9" fill="#fde68a" />
+</svg>

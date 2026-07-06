@@ -50,7 +50,7 @@ export function HeaderLocaleSwitcher() {
                         onClick={() => handleChange(option)}
                         disabled={isPending}
                         aria-pressed={isActive}
-                        className={`relative z-10 min-w-[2.75rem] rounded-full border-0 bg-transparent px-3 py-1.5 text-xs font-semibold tracking-[0.08em] uppercase transition-colors duration-200 ${
+                        className={`relative z-10 min-w-[2.35rem] rounded-full border-0 bg-transparent px-2.5 py-1 text-[10px] font-semibold tracking-[0.08em] uppercase transition-colors duration-200 ${
                             isActive
                                 ? 'text-[#1c1c1e]'
                                 : 'text-[rgb(235_235_245/58%)] hover:text-[rgb(235_235_245/82%)]'
