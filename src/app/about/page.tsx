@@ -20,7 +20,7 @@ export default function AboutPage() {
                     <p className="text-sm font-bold uppercase tracking-[0.35em] text-cyan-300">
                         About Project
                     </p>
-                    <h1 className="mt-3 bg-gradient-to-r from-cyan-200 via-fuchsia-300 to-yellow-200 bg-clip-text text-4xl font-black text-transparent">
+                    <h1 className="mt-3 bg-gradient-to-r from-cyan-200 via-fuchsia-300 to-yellow-200 bg-clip-text pb-1 text-4xl font-black leading-tight text-transparent">
                         Swagger Editor App
                     </h1>
                     <p className="mt-4 max-w-3xl text-cyan-100/70">

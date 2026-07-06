@@ -11,7 +11,7 @@ export default async function HomePage() {
                     <p className="text-sm font-bold uppercase tracking-[0.35em] text-cyan-300">
                         Swagger/OpenAPI UI
                     </p>
-                    <h1 className="mt-3 max-w-3xl bg-gradient-to-r from-cyan-200 via-fuchsia-300 to-yellow-200 bg-clip-text text-3xl font-black tracking-tight text-transparent md:text-5xl">
+                    <h1 className="mt-3 max-w-3xl bg-gradient-to-r from-cyan-200 via-fuchsia-300 to-yellow-200 bg-clip-text pb-1 text-3xl font-black leading-tight tracking-tight text-transparent md:text-5xl">
                         Build, preview, and test API specifications
                     </h1>
                     <p className="mt-5 max-w-2xl text-cyan-100/70">
