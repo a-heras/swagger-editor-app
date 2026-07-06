@@ -4,7 +4,9 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { deleteRequestHistoryItems } from '@/app/actions/request-history';
+import { useI18n } from '@/components/i18n/locale-provider';
 import type { RequestHistoryPageResult } from '@/lib/history/types';
+import { showError, showSuccess } from '@/lib/ui/toast';
 
 import { HistoryEmptyState } from './history-empty-state';
 import { HistoryList } from './history-list';
@@ -28,6 +30,7 @@ const cancelButtonClassName =
 
 export default function HistoryPanel({ historyPage }: HistoryPanelProps) {
     const router = useRouter();
+    const { t } = useI18n();
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isDeleting, startDeleting] = useTransition();
@@ -68,7 +71,7 @@ export default function HistoryPanel({ historyPage }: HistoryPanelProps) {
         }
 
         const confirmed = window.confirm(
-            `Delete ${selectedIds.length} selected request(s)?`,
+            t('history.deleteSelectedConfirm', { count: selectedIds.length }),
         );
 
         if (!confirmed) {
@@ -79,9 +82,13 @@ export default function HistoryPanel({ historyPage }: HistoryPanelProps) {
             const result = await deleteRequestHistoryItems(selectedIds);
 
             if (!result.ok) {
-                window.alert(result.message ?? 'Failed to delete requests.');
+                showError(result.message ?? t('history.deleteManyFailed'));
                 return;
             }
+
+            showSuccess(
+                t('history.deletedMany', { count: selectedIds.length }),
+            );
 
             setSelectedIds([]);
             setIsSelectionMode(false);
@@ -104,7 +111,7 @@ export default function HistoryPanel({ historyPage }: HistoryPanelProps) {
                             onChange={handleToggleAllOnPage}
                             className={checkboxClassName}
                         />
-                        Select all on page
+                        {t('history.selectAll')}
                     </label>
 
                     <button
@@ -113,7 +120,7 @@ export default function HistoryPanel({ historyPage }: HistoryPanelProps) {
                         disabled={isDeleting}
                         className={cancelButtonClassName}
                     >
-                        Cancel
+                        {t('history.cancel')}
                     </button>
 
                     <button
@@ -123,8 +130,10 @@ export default function HistoryPanel({ historyPage }: HistoryPanelProps) {
                         className={deleteButtonClassName}
                     >
                         {isDeleting
-                            ? 'Deleting...'
-                            : `Delete selected (${selectedIds.length})`}
+                            ? t('history.deleting')
+                            : t('history.deleteSelected', {
+                                  count: selectedIds.length,
+                              })}
                     </button>
                 </div>
             ) : (
@@ -134,7 +143,7 @@ export default function HistoryPanel({ historyPage }: HistoryPanelProps) {
                         onClick={() => setIsSelectionMode(true)}
                         className={selectButtonClassName}
                     >
-                        Select
+                        {t('history.select')}
                     </button>
                 </div>
             )}

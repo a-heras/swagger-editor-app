@@ -8,12 +8,12 @@ import {
 } from '@/lib/auth/validation';
 import { createClient } from '@/lib/supabase/server';
 
-function redirectWithMessage(
+function redirectWithKey(
     path: '/sign-in' | '/sign-up',
-    type: 'error' | 'message',
-    message: string,
+    type: 'errorKey' | 'messageKey',
+    key: string,
 ) {
-    redirect(`${path}?${type}=${encodeURIComponent(message)}`);
+    redirect(`${path}?${type}=${encodeURIComponent(key)}`);
 }
 
 export async function signIn(formData: FormData) {
@@ -22,11 +22,7 @@ export async function signIn(formData: FormData) {
     const errors = validateAuthForm(email, password);
 
     if (hasAuthValidationErrors(errors)) {
-        redirectWithMessage(
-            '/sign-in',
-            'error',
-            'Check email and password requirements.',
-        );
+        redirectWithKey('/sign-in', 'errorKey', 'auth.validationFailed');
     }
 
     const supabase = await createClient();
@@ -36,10 +32,10 @@ export async function signIn(formData: FormData) {
     });
 
     if (error) {
-        redirectWithMessage('/sign-in', 'error', error.message);
+        redirect(`/sign-in?error=${encodeURIComponent(error.message)}`);
     }
 
-    redirect('/');
+    redirect('/?successKey=auth.signedIn');
 }
 
 export async function signUp(formData: FormData) {
@@ -48,11 +44,7 @@ export async function signUp(formData: FormData) {
     const errors = validateAuthForm(email, password);
 
     if (hasAuthValidationErrors(errors)) {
-        redirectWithMessage(
-            '/sign-up',
-            'error',
-            'Check email and password requirements.',
-        );
+        redirectWithKey('/sign-up', 'errorKey', 'auth.validationFailed');
     }
 
     const supabase = await createClient();
@@ -62,18 +54,14 @@ export async function signUp(formData: FormData) {
     });
 
     if (error) {
-        redirectWithMessage('/sign-up', 'error', error.message);
+        redirect(`/sign-up?error=${encodeURIComponent(error.message)}`);
     }
 
     if (!data.session) {
-        redirectWithMessage(
-            '/sign-in',
-            'message',
-            'Check your email to confirm registration, then sign in.',
-        );
+        redirectWithKey('/sign-in', 'messageKey', 'auth.confirmEmail');
     }
 
-    redirect('/');
+    redirect('/?successKey=auth.accountCreated');
 }
 
 export async function signOut() {

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { useI18n } from '@/components/i18n/locale-provider';
 import type { ApiEndpoint } from '@/lib/openapi/types';
 import { groupEndpointsByPath } from '@/lib/openapi/schema-display';
 import { EndpointDetails } from './endpoint-details';
@@ -12,6 +13,7 @@ type SchemaViewerProps = {
 };
 
 export function SchemaViewer({ endpoints, baseUrl }: SchemaViewerProps) {
+    const { t } = useI18n();
     const [openEndpointId, setOpenEndpointId] = useState<string | null>(null);
     const groupedEndpoints = groupEndpointsByPath(endpoints);
 
@@ -24,15 +26,15 @@ export function SchemaViewer({ endpoints, baseUrl }: SchemaViewerProps) {
     return (
         <section className="rounded-2xl border border-fuchsia-300/20 bg-slate-950/70 p-5 shadow-[0_0_35px_rgba(217,70,239,0.12)] backdrop-blur-xl">
             <h2 className="text-lg font-black uppercase tracking-[0.22em] text-fuchsia-200">
-                Viewer
+                {t('viewer.title')}
             </h2>
             <p className="mt-3 text-sm text-cyan-100/65">
-                Valid endpoints from the schema appear here automatically.
+                {t('viewer.description')}
             </p>
 
             {endpoints.length === 0 ? (
                 <div className="mt-6 rounded-xl border border-dashed border-cyan-300/30 bg-cyan-300/5 p-6 text-center text-sm text-cyan-100/55">
-                    No schema loaded yet.
+                    {t('viewer.empty')}
                 </div>
             ) : (
                 <div className="mt-6 flex flex-col gap-6">

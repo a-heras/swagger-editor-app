@@ -54,7 +54,7 @@ export async function saveSchema(content: string) {
     if (!user) {
         return {
             ok: false,
-            message: 'Sign in to save schemas.',
+            messageKey: 'editor.signInToSave',
         };
     }
 
@@ -81,6 +81,6 @@ export async function saveSchema(content: string) {
 
     return {
         ok: true,
-        message: 'Schema saved.',
+        messageKey: 'editor.schemaSaved',
     };
 }

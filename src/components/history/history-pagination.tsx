@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 
+import { useI18n } from '@/components/i18n/locale-provider';
+
 type HistoryPaginationProps = {
     page: number;
     pageSize: number;
@@ -68,6 +70,8 @@ export function HistoryPagination({
     totalPages,
     totalCount,
 }: HistoryPaginationProps) {
+    const { t } = useI18n();
+
     if (totalPages <= 1) {
         return null;
     }
@@ -83,20 +87,24 @@ export function HistoryPagination({
     return (
         <div className="flex flex-col items-center gap-4 border-t border-cyan-300/10 pt-6 text-center">
             <p className="text-sm text-cyan-100/60">
-                Showing {rangeStart}-{rangeEnd} of {totalCount} requests
+                {t('history.paginationShowing', {
+                    start: rangeStart,
+                    end: rangeEnd,
+                    total: totalCount,
+                })}
             </p>
 
             <nav
                 className="flex flex-wrap items-center justify-center gap-2"
-                aria-label="History pagination"
+                aria-label={t('history.paginationLabel')}
             >
                 <PaginationNavButton
-                    label="First"
+                    label={t('history.first')}
                     href="/history?page=1"
                     disabled={isFirstDisabled}
                 />
                 <PaginationNavButton
-                    label="Previous"
+                    label={t('history.previous')}
                     href={`/history?page=${page - 1}`}
                     disabled={isPreviousDisabled}
                 />
@@ -122,12 +130,12 @@ export function HistoryPagination({
                 )}
 
                 <PaginationNavButton
-                    label="Next"
+                    label={t('history.next')}
                     href={`/history?page=${page + 1}`}
                     disabled={isNextDisabled}
                 />
                 <PaginationNavButton
-                    label="Last"
+                    label={t('history.last')}
                     href={`/history?page=${totalPages}`}
                     disabled={isLastDisabled}
                 />

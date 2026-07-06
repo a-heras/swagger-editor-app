@@ -4,11 +4,16 @@ import { redirect } from 'next/navigation';
 
 import { signUp } from '@/app/actions/auth';
 import { AuthForm } from '@/components/auth/auth-form';
+import { getDictionary } from '@/i18n/get-dictionary';
+import { getLocale } from '@/i18n/get-locale';
+import { createTranslator } from '@/i18n/translate';
 
 type SignUpPageProps = {
     searchParams?: Promise<{
         error?: string;
+        errorKey?: string;
         message?: string;
+        messageKey?: string;
     }>;
 };
 
@@ -18,6 +23,9 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
         data: { user },
     } = await supabase.auth.getUser();
     const params = await searchParams;
+    const locale = await getLocale();
+    const dictionary = await getDictionary(locale);
+    const t = createTranslator(dictionary);
 
     if (user) {
         redirect('/');
@@ -27,21 +35,23 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
         <section className="flex flex-1 items-center justify-center px-6 py-10">
             <div className="w-full max-w-md">
                 <AuthForm
-                    title="Sign Up"
-                    description="Create an account to save schemas and track API requests."
-                    submitLabel="Sign Up"
+                    titleKey="auth.signUpTitle"
+                    descriptionKey="auth.signUpDescription"
+                    submitLabelKey="auth.signUpTitle"
                     action={signUp}
                     errorMessage={params?.error}
+                    errorKey={params?.errorKey}
                     infoMessage={params?.message}
+                    infoKey={params?.messageKey}
                 />
 
                 <p className="mt-6 text-sm text-cyan-100/65">
-                    Already have an account?{' '}
+                    {t('auth.haveAccount')}{' '}
                     <Link
                         href="/sign-in"
                         className="font-semibold text-cyan-300 hover:text-fuchsia-300"
                     >
-                        Sign In
+                        {t('auth.signInTitle')}
                     </Link>
                 </p>
             </div>

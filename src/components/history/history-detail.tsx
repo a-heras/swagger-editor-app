@@ -2,19 +2,13 @@
 
 import Link from 'next/link';
 
+import { useI18n } from '@/components/i18n/locale-provider';
 import type { RequestHistoryDetail } from '@/lib/history/types';
 import { HistoryDeleteButton } from './history-delete-button';
 
 type HistoryDetailProps = {
     item: RequestHistoryDetail;
 };
-
-function formatTimestamp(value: string) {
-    return new Intl.DateTimeFormat('en-GB', {
-        dateStyle: 'full',
-        timeStyle: 'medium',
-    }).format(new Date(value));
-}
 
 function formatBytes(value: number) {
     return `${value} B`;
@@ -69,6 +63,15 @@ function CodeSection({ label, value }: CodeSectionProps) {
 }
 
 export function HistoryDetail({ item }: HistoryDetailProps) {
+    const { t, locale } = useI18n();
+
+    function formatTimestamp(value: string) {
+        return new Intl.DateTimeFormat(locale === 'ru' ? 'ru-RU' : 'en-GB', {
+            dateStyle: 'full',
+            timeStyle: 'medium',
+        }).format(new Date(value));
+    }
+
     return (
         <div className="flex min-w-0 flex-col gap-6">
             <div className="flex flex-wrap items-center gap-3">
@@ -76,11 +79,11 @@ export function HistoryDetail({ item }: HistoryDetailProps) {
                     href="/history"
                     className="w-fit rounded-md border border-fuchsia-300/40 bg-fuchsia-400/10 px-4 py-2 text-sm font-semibold text-fuchsia-200 shadow-[0_0_18px_rgba(217,70,239,0.15)] transition hover:border-fuchsia-300/70 hover:bg-fuchsia-400/20 hover:text-fuchsia-100"
                 >
-                    ← Back to history
+                    ← {t('history.backToHistory')}
                 </Link>
                 <HistoryDeleteButton
                     id={item.id}
-                    label="Delete request"
+                    label={t('history.deleteRequest')}
                     redirectToHistory
                 />
             </div>
@@ -97,36 +100,42 @@ export function HistoryDetail({ item }: HistoryDetailProps) {
 
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
                     <DetailRow
-                        label="Response Status"
-                        value={item.status?.toString() ?? 'Failed'}
+                        label={t('history.responseStatus')}
+                        value={item.status?.toString() ?? t('history.failed')}
                     />
                     <DetailRow
-                        label="Duration"
+                        label={t('history.duration')}
                         value={`${item.durationMs} ms`}
                     />
                     <DetailRow
-                        label="Timestamp"
+                        label={t('history.timestamp')}
                         value={formatTimestamp(item.createdAt)}
                     />
-                    <DetailRow label="Method" value={item.method} />
                     <DetailRow
-                        label="Request Size"
+                        label={t('history.method')}
+                        value={item.method}
+                    />
+                    <DetailRow
+                        label={t('history.requestSize')}
                         value={formatBytes(item.requestSize)}
                     />
                     <DetailRow
-                        label="Response Size"
+                        label={t('history.responseSize')}
                         value={formatBytes(item.responseSize)}
                     />
-                    <DetailRow label="Endpoint / URL" value={item.url} />
                     <DetailRow
-                        label="Error Details"
-                        value={item.errorDetails ?? 'None'}
+                        label={t('history.endpointUrl')}
+                        value={item.url}
+                    />
+                    <DetailRow
+                        label={t('history.errorDetails')}
+                        value={item.errorDetails ?? t('history.none')}
                     />
                 </div>
 
                 <div className="mt-8 grid min-w-0 gap-6">
                     <CodeSection
-                        label="Request Headers"
+                        label={t('history.requestHeaders')}
                         value={formatJsonBlock(
                             item.requestHeaders
                                 ? JSON.stringify(item.requestHeaders)
@@ -134,11 +143,11 @@ export function HistoryDetail({ item }: HistoryDetailProps) {
                         )}
                     />
                     <CodeSection
-                        label="Request Body"
+                        label={t('tryItOut.requestBody')}
                         value={formatJsonBlock(item.requestBody)}
                     />
                     <CodeSection
-                        label="Response Headers"
+                        label={t('history.responseHeaders')}
                         value={formatJsonBlock(
                             item.responseHeaders
                                 ? JSON.stringify(item.responseHeaders)
@@ -146,7 +155,7 @@ export function HistoryDetail({ item }: HistoryDetailProps) {
                         )}
                     />
                     <CodeSection
-                        label="Response Body"
+                        label={t('history.responseBody')}
                         value={formatJsonBlock(item.responseBody)}
                     />
                 </div>

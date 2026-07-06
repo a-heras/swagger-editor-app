@@ -10,11 +10,11 @@ const specialCharacterPattern = /[^\p{L}\p{N}\s]/u;
 
 export function validateEmail(email: string): string | undefined {
     if (!email.trim()) {
-        return 'Email is required.';
+        return 'auth.emailRequired';
     }
 
     if (!emailPattern.test(email)) {
-        return 'Enter a valid email address.';
+        return 'auth.emailInvalid';
     }
 
     return undefined;
@@ -22,23 +22,23 @@ export function validateEmail(email: string): string | undefined {
 
 export function validatePassword(password: string): string | undefined {
     if (!password) {
-        return 'Password is required.';
+        return 'auth.passwordRequired';
     }
 
     if (password.length < 8) {
-        return 'Password must contain at least 8 characters.';
+        return 'auth.passwordMinLength';
     }
 
     if (!letterPattern.test(password)) {
-        return 'Password must contain at least one letter.';
+        return 'auth.passwordLetter';
     }
 
     if (!digitPattern.test(password)) {
-        return 'Password must contain at least one digit.';
+        return 'auth.passwordDigit';
     }
 
     if (!specialCharacterPattern.test(password)) {
-        return 'Password must contain at least one special character.';
+        return 'auth.passwordSpecial';
     }
 
     return undefined;

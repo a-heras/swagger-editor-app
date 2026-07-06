@@ -13,10 +13,19 @@ export function buildRequestUrl(
     }
 
     const resolvedBase = baseUrl || 'http://localhost';
-    const url = new URL(
-        path,
-        resolvedBase.endsWith('/') ? resolvedBase : `${resolvedBase}/`,
-    );
+
+    let url: URL;
+
+    try {
+        url = new URL(
+            path,
+            resolvedBase.endsWith('/') ? resolvedBase : `${resolvedBase}/`,
+        );
+    } catch {
+        throw new Error(
+            'Invalid base URL or request path. Check the server URL and path parameters.',
+        );
+    }
 
     for (const [key, value] of Object.entries(queryParams)) {
         if (value) {

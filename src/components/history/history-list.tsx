@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 
+import { useI18n } from '@/components/i18n/locale-provider';
 import type { RequestHistoryEntry } from '@/lib/history/types';
 
 import { HistoryDeleteButton } from './history-delete-button';
@@ -19,13 +20,6 @@ const checkboxClassName =
 const actionLinkClassName =
     'shrink-0 rounded-md border border-fuchsia-300/40 bg-fuchsia-400/10 px-4 py-2 text-sm font-semibold text-fuchsia-200 shadow-[0_0_18px_rgba(217,70,239,0.15)] transition hover:border-fuchsia-300/70 hover:bg-fuchsia-400/20 hover:text-fuchsia-100';
 
-function formatTimestamp(value: string) {
-    return new Intl.DateTimeFormat('en-GB', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(new Date(value));
-}
-
 function formatBytes(value: number) {
     return `${value} B`;
 }
@@ -36,6 +30,15 @@ export function HistoryList({
     selectedIds,
     onToggle,
 }: HistoryListProps) {
+    const { t, locale } = useI18n();
+
+    function formatTimestamp(value: string) {
+        return new Intl.DateTimeFormat(locale === 'ru' ? 'ru-RU' : 'en-GB', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+        }).format(new Date(value));
+    }
+
     return (
         <div className="grid gap-4">
             {items.map((item) => {
@@ -76,7 +79,7 @@ export function HistoryList({
                                     checked={isSelected}
                                     onChange={() => onToggle(item.id)}
                                     onClick={(event) => event.stopPropagation()}
-                                    aria-label={`Select request ${item.method} ${item.url}`}
+                                    aria-label={`${item.method} ${item.url}`}
                                     className={checkboxClassName}
                                 />
                             ) : null}
@@ -92,38 +95,39 @@ export function HistoryList({
                                 </div>
                                 <div className="mt-4 grid gap-2 text-sm text-cyan-100/65 sm:grid-cols-2">
                                     <p>
-                                        Status:{' '}
+                                        {t('history.status')}:{' '}
                                         <span className="font-semibold text-cyan-100">
-                                            {item.status ?? 'Failed'}
+                                            {item.status ?? t('history.failed')}
                                         </span>
                                     </p>
                                     <p>
-                                        Duration:{' '}
+                                        {t('history.duration')}:{' '}
                                         <span className="font-semibold text-cyan-100">
                                             {item.durationMs} ms
                                         </span>
                                     </p>
                                     <p>
-                                        Request size:{' '}
+                                        {t('history.requestSize')}:{' '}
                                         <span className="font-semibold text-cyan-100">
                                             {formatBytes(item.requestSize)}
                                         </span>
                                     </p>
                                     <p>
-                                        Response size:{' '}
+                                        {t('history.responseSize')}:{' '}
                                         <span className="font-semibold text-cyan-100">
                                             {formatBytes(item.responseSize)}
                                         </span>
                                     </p>
                                     <p className="sm:col-span-2">
-                                        Timestamp:{' '}
+                                        {t('history.timestamp')}:{' '}
                                         <span className="font-semibold text-cyan-100">
                                             {formatTimestamp(item.createdAt)}
                                         </span>
                                     </p>
                                     {item.errorDetails ? (
                                         <p className="sm:col-span-2 text-fuchsia-200/80">
-                                            Error: {item.errorDetails}
+                                            {t('history.error')}:{' '}
+                                            {item.errorDetails}
                                         </p>
                                     ) : null}
                                 </div>
@@ -135,7 +139,7 @@ export function HistoryList({
                                         href={`/history/${item.id}`}
                                         className={actionLinkClassName}
                                     >
-                                        View details
+                                        {t('history.viewDetails')}
                                     </Link>
                                     <HistoryDeleteButton id={item.id} />
                                 </div>

@@ -20,6 +20,8 @@ import {
     getMediaTypeExample,
     groupParametersByLocation,
 } from '@/lib/openapi/schema-display';
+import { showError } from '@/lib/ui/toast';
+import { useI18n } from '@/components/i18n/locale-provider';
 
 type TryItOutProps = {
     endpoint: ApiEndpoint;
@@ -68,6 +70,7 @@ function formatResponseBody(body: string) {
 
 type ParameterInputsProps = {
     title: string;
+    requiredLabel: string;
     parameters: OpenApiParameter[];
     values: Record<string, string>;
     onChange: (name: string, value: string) => void;
@@ -75,6 +78,7 @@ type ParameterInputsProps = {
 
 function ParameterInputs({
     title,
+    requiredLabel,
     parameters,
     values,
     onChange,
@@ -100,7 +104,7 @@ function ParameterInputs({
                             {name}
                             {parameter.required ? (
                                 <span className="text-[10px] font-bold uppercase text-fuchsia-200">
-                                    required
+                                    {requiredLabel}
                                 </span>
                             ) : null}
                             <input
@@ -120,6 +124,7 @@ function ParameterInputs({
 }
 
 export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
+    const { t } = useI18n();
     const groupedParameters = useMemo(
         () => groupParametersByLocation(endpoint.parameters),
         [endpoint.parameters],
@@ -149,11 +154,14 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
     const [curlCommand, setCurlCommand] = useState('');
     const [copied, setCopied] = useState(false);
     const [customBaseUrl, setCustomBaseUrl] = useState('');
-    const [errorMessage, setErrorMessage] = useState<string>();
     const [response, setResponse] = useState<ProxySuccess>();
     const [isExecuting, startExecuting] = useTransition();
 
     const effectiveBaseUrl = (baseUrl || customBaseUrl).trim();
+
+    function reportError(message: string) {
+        showError(message);
+    }
 
     const hasRequestBody =
         Boolean(endpoint.requestBody) && methodSupportsBody(endpoint.method);
@@ -189,12 +197,19 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
 
     function handleGenerateCurl() {
         if (!effectiveBaseUrl) {
-            setErrorMessage('Enter a base URL or add servers to the schema.');
+            reportError(t('tryItOut.missingBaseUrl'));
             return;
         }
 
-        setErrorMessage(undefined);
-        setCurlCommand(generateCurlCommand(getRequestConfig()));
+        try {
+            setCurlCommand(generateCurlCommand(getRequestConfig()));
+        } catch (error) {
+            reportError(
+                error instanceof Error
+                    ? error.message
+                    : t('tryItOut.generateCurlFailed'),
+            );
+        }
     }
 
     async function handleCopyCurl() {
@@ -209,14 +224,24 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
 
     function handleExecute() {
         if (!effectiveBaseUrl) {
-            setErrorMessage('Enter a base URL or add servers to the schema.');
+            reportError(t('tryItOut.missingBaseUrl'));
             return;
         }
 
-        setErrorMessage(undefined);
         setResponse(undefined);
 
-        const requestConfig = getRequestConfig();
+        let requestConfig;
+
+        try {
+            requestConfig = getRequestConfig();
+        } catch (error) {
+            reportError(
+                error instanceof Error
+                    ? error.message
+                    : t('tryItOut.requestFailed'),
+            );
+            return;
+        }
 
         startExecuting(async () => {
             try {
@@ -233,14 +258,16 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
                     ProxySuccess | ProxyFailure;
 
                 if ('error' in data) {
-                    setErrorMessage(data.error);
+                    reportError(data.error);
                     return;
                 }
 
                 setResponse(data);
             } catch (error) {
-                setErrorMessage(
-                    error instanceof Error ? error.message : 'Request failed',
+                reportError(
+                    error instanceof Error
+                        ? error.message
+                        : t('tryItOut.requestFailed'),
                 );
             }
         });
@@ -249,22 +276,22 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
     return (
         <div className="min-w-0 max-w-full rounded-xl border border-fuchsia-300/20 bg-fuchsia-400/5 p-4">
             <h4 className="text-xs font-bold uppercase tracking-[0.22em] text-fuchsia-200">
-                Try It Out
+                {t('tryItOut.title')}
             </h4>
 
             {baseUrl ? (
                 <p className="mt-2 font-mono text-xs text-cyan-100/55">
-                    Base URL: {baseUrl}
+                    {t('tryItOut.baseUrl')}: {baseUrl}
                 </p>
             ) : (
                 <label className="mt-3 flex flex-col gap-2 text-sm font-semibold text-cyan-100/80">
-                    Base URL
+                    {t('tryItOut.baseUrl')}
                     <input
                         value={customBaseUrl}
                         onChange={(event) =>
                             setCustomBaseUrl(event.target.value)
                         }
-                        placeholder="https://api.example.com"
+                        placeholder={t('tryItOut.baseUrlPlaceholder')}
                         className={inputClassName}
                     />
                 </label>
@@ -272,7 +299,8 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
 
             <div className="mt-4 flex flex-col gap-4">
                 <ParameterInputs
-                    title="Path"
+                    title={t('tryItOut.path')}
+                    requiredLabel={t('tryItOut.required')}
                     parameters={groupedParameters.path}
                     values={pathParams}
                     onChange={(name, value) =>
@@ -280,7 +308,8 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
                     }
                 />
                 <ParameterInputs
-                    title="Query"
+                    title={t('tryItOut.query')}
+                    requiredLabel={t('tryItOut.required')}
                     parameters={groupedParameters.query}
                     values={queryParams}
                     onChange={(name, value) =>
@@ -288,7 +317,8 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
                     }
                 />
                 <ParameterInputs
-                    title="Headers"
+                    title={t('tryItOut.headers')}
+                    requiredLabel={t('tryItOut.required')}
                     parameters={groupedParameters.header}
                     values={headerParams}
                     onChange={(name, value) =>
@@ -296,7 +326,8 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
                     }
                 />
                 <ParameterInputs
-                    title="Cookies"
+                    title={t('tryItOut.cookies')}
+                    requiredLabel={t('tryItOut.required')}
                     parameters={groupedParameters.cookie}
                     values={cookieParams}
                     onChange={(name, value) =>
@@ -308,7 +339,7 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
                     <div className="flex flex-col gap-3">
                         {contentTypes.length > 1 ? (
                             <label className="flex flex-col gap-2 text-sm font-semibold text-cyan-100/80">
-                                Content-Type
+                                {t('tryItOut.contentType')}
                                 <select
                                     value={contentType}
                                     onChange={(event) => {
@@ -337,12 +368,12 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
                             </label>
                         ) : (
                             <p className="text-xs font-mono text-cyan-100/55">
-                                Content-Type: {contentType}
+                                {t('tryItOut.contentType')}: {contentType}
                             </p>
                         )}
 
                         <label className="flex flex-col gap-2 text-sm font-semibold text-cyan-100/80">
-                            Request Body
+                            {t('tryItOut.requestBody')}
                             <textarea
                                 value={body}
                                 onChange={(event) =>
@@ -363,7 +394,9 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
                     disabled={isExecuting || !effectiveBaseUrl}
                     className="rounded-md bg-gradient-to-r from-cyan-300 to-fuchsia-400 px-4 py-2 text-sm font-bold text-slate-950 shadow-[0_0_20px_rgba(34,211,238,0.25)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                    {isExecuting ? 'Executing...' : 'Execute'}
+                    {isExecuting
+                        ? t('tryItOut.executing')
+                        : t('tryItOut.execute')}
                 </button>
                 <button
                     type="button"
@@ -371,7 +404,7 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
                     disabled={!effectiveBaseUrl}
                     className="rounded-md border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                    Generate cURL
+                    {t('tryItOut.generateCurl')}
                 </button>
                 {curlCommand ? (
                     <button
@@ -379,16 +412,10 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
                         onClick={handleCopyCurl}
                         className="rounded-md border border-fuchsia-300/30 bg-fuchsia-400/10 px-4 py-2 text-sm font-semibold text-fuchsia-100 transition hover:text-fuchsia-200"
                     >
-                        {copied ? 'Copied!' : 'Copy cURL'}
+                        {copied ? t('tryItOut.copied') : t('tryItOut.copyCurl')}
                     </button>
                 ) : null}
             </div>
-
-            {errorMessage ? (
-                <div className="mt-4 rounded-md border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                    {errorMessage}
-                </div>
-            ) : null}
 
             {curlCommand ? (
                 <pre className="mt-4 max-h-48 w-full max-w-full overflow-auto whitespace-pre-wrap break-words rounded-lg border border-cyan-300/10 bg-black/50 p-3 font-mono text-xs leading-relaxed text-cyan-100/85">
@@ -400,16 +427,17 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
                 <div className="mt-4 min-w-0 max-w-full space-y-4 rounded-lg border border-cyan-300/15 bg-black/35 p-4">
                     <div className="flex flex-wrap items-center gap-3 text-sm">
                         <span className="font-bold text-fuchsia-200">
-                            Status: {response.status} {response.statusText}
+                            {t('tryItOut.statusLabel')}: {response.status}{' '}
+                            {response.statusText}
                         </span>
                         <span className="text-cyan-100/60">
-                            Duration: {response.durationMs} ms
+                            {t('history.duration')}: {response.durationMs} ms
                         </span>
                     </div>
 
                     <div className="min-w-0 max-w-full">
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
-                            Response Headers
+                            {t('tryItOut.responseHeaders')}
                         </p>
                         <pre className="mt-2 max-h-96 w-full max-w-full overflow-auto whitespace-pre-wrap break-words rounded-lg border border-cyan-300/10 bg-black/50 p-3 font-mono text-xs text-cyan-100/85">
                             {JSON.stringify(response.headers, null, 2)}
@@ -418,7 +446,7 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
 
                     <div className="min-w-0 max-w-full">
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
-                            Response Body
+                            {t('tryItOut.responseBody')}
                         </p>
                         <pre className="mt-2 max-h-96 w-full max-w-full overflow-auto whitespace-pre-wrap break-words rounded-lg border border-cyan-300/10 bg-black/50 p-3 font-mono text-xs text-cyan-100/85">
                             {formatResponseBody(response.body)}

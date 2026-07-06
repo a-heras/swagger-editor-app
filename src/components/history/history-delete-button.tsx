@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
 import { deleteRequestHistoryItem } from '@/app/actions/request-history';
+import { useI18n } from '@/components/i18n/locale-provider';
+import { showError, showSuccess } from '@/lib/ui/toast';
 
 type HistoryDeleteButtonProps = {
     id: string;
@@ -17,17 +19,17 @@ const deleteButtonClassName =
 
 export function HistoryDeleteButton({
     id,
-    label = 'Delete',
+    label,
     redirectToHistory = false,
     className,
 }: HistoryDeleteButtonProps) {
     const router = useRouter();
+    const { t } = useI18n();
     const [isPending, startTransition] = useTransition();
+    const buttonLabel = label ?? t('history.delete');
 
     function handleDelete() {
-        const confirmed = window.confirm(
-            'Delete this request from your history?',
-        );
+        const confirmed = window.confirm(t('history.deleteConfirm'));
 
         if (!confirmed) {
             return;
@@ -37,9 +39,11 @@ export function HistoryDeleteButton({
             const result = await deleteRequestHistoryItem(id);
 
             if (!result.ok) {
-                window.alert(result.message ?? 'Failed to delete request.');
+                showError(result.message ?? t('history.deleteFailed'));
                 return;
             }
+
+            showSuccess(t('history.deletedOne'));
 
             if (redirectToHistory) {
                 router.push('/history');
@@ -56,7 +60,7 @@ export function HistoryDeleteButton({
             disabled={isPending}
             className={className ?? deleteButtonClassName}
         >
-            {isPending ? 'Deleting...' : label}
+            {isPending ? t('history.deleting') : buttonLabel}
         </button>
     );
 }

@@ -4,6 +4,8 @@ import { useTransition } from 'react';
 import { useMemo, useState } from 'react';
 
 import { saveSchema } from '@/app/actions/schema';
+import { useI18n } from '@/components/i18n/locale-provider';
+import { showError, showSuccess } from '@/lib/ui/toast';
 import { SchemaEditor } from './schema-editor';
 import { SchemaViewer } from './schema-viewer';
 
@@ -31,6 +33,7 @@ type SwaggerWorkspaceProps = {
 };
 
 export function SwaggerWorkspace({ initialSchema }: SwaggerWorkspaceProps) {
+    const { t } = useI18n();
     const [schemaSource, setSchemaSource] = useState(
         initialSchema ?? defaultSchema,
     );
@@ -71,8 +74,19 @@ export function SwaggerWorkspace({ initialSchema }: SwaggerWorkspaceProps) {
     function handleSaveSchema() {
         startSaving(async () => {
             const result = await saveSchema(schemaSource);
+            const message =
+                'messageKey' in result && result.messageKey
+                    ? t(result.messageKey)
+                    : (result.message ?? t('errors.title'));
 
-            setSaveMessage(result.message);
+            setSaveMessage(message);
+
+            if (result.ok) {
+                showSuccess(message);
+                return;
+            }
+
+            showError(message);
         });
     }
 
