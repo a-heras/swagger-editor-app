@@ -100,3 +100,50 @@ body::before {
 .site-header__inner {
     height: 100%;
 }
+
+.site-loader {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
+.site-loader__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    border-top-color: rgb(34 211 238 / 90%);
+    border-right-color: rgb(217 70 239 / 70%);
+    box-shadow: 0 0 24px rgb(34 211 238 / 18%);
+    animation: site-loader-spin 0.9s linear infinite;
+}
+
+.site-loader__core {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #67e8f9, #e879f9, #fde68a);
+    box-shadow: 0 0 16px rgb(217 70 239 / 45%);
+    animation: site-loader-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes site-loader-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes site-loader-pulse {
+    0%,
+    100% {
+        transform: scale(0.9);
+        opacity: 0.75;
+    }
+
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+}
