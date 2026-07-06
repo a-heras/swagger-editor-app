@@ -247,7 +247,7 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
     }
 
     return (
-        <div className="rounded-xl border border-fuchsia-300/20 bg-fuchsia-400/5 p-4">
+        <div className="min-w-0 max-w-full rounded-xl border border-fuchsia-300/20 bg-fuchsia-400/5 p-4">
             <h4 className="text-xs font-bold uppercase tracking-[0.22em] text-fuchsia-200">
                 Try It Out
             </h4>
@@ -391,13 +391,13 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
             ) : null}
 
             {curlCommand ? (
-                <pre className="mt-4 overflow-x-auto rounded-lg border border-cyan-300/10 bg-black/50 p-3 font-mono text-xs leading-relaxed text-cyan-100/85">
+                <pre className="mt-4 max-h-48 w-full max-w-full overflow-auto whitespace-pre-wrap break-words rounded-lg border border-cyan-300/10 bg-black/50 p-3 font-mono text-xs leading-relaxed text-cyan-100/85">
                     {curlCommand}
                 </pre>
             ) : null}
 
             {response ? (
-                <div className="mt-4 space-y-4 rounded-lg border border-cyan-300/15 bg-black/35 p-4">
+                <div className="mt-4 min-w-0 max-w-full space-y-4 rounded-lg border border-cyan-300/15 bg-black/35 p-4">
                     <div className="flex flex-wrap items-center gap-3 text-sm">
                         <span className="font-bold text-fuchsia-200">
                             Status: {response.status} {response.statusText}
@@ -407,20 +407,20 @@ export function TryItOut({ endpoint, baseUrl }: TryItOutProps) {
                         </span>
                     </div>
 
-                    <div>
+                    <div className="min-w-0 max-w-full">
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
                             Response Headers
                         </p>
-                        <pre className="mt-2 overflow-x-auto rounded-lg border border-cyan-300/10 bg-black/50 p-3 font-mono text-xs text-cyan-100/85">
+                        <pre className="mt-2 max-h-96 w-full max-w-full overflow-auto whitespace-pre-wrap break-words rounded-lg border border-cyan-300/10 bg-black/50 p-3 font-mono text-xs text-cyan-100/85">
                             {JSON.stringify(response.headers, null, 2)}
                         </pre>
                     </div>
 
-                    <div>
+                    <div className="min-w-0 max-w-full">
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
                             Response Body
                         </p>
-                        <pre className="mt-2 overflow-x-auto rounded-lg border border-cyan-300/10 bg-black/50 p-3 font-mono text-xs text-cyan-100/85">
+                        <pre className="mt-2 max-h-96 w-full max-w-full overflow-auto whitespace-pre-wrap break-words rounded-lg border border-cyan-300/10 bg-black/50 p-3 font-mono text-xs text-cyan-100/85">
                             {formatResponseBody(response.body)}
                         </pre>
                     </div>

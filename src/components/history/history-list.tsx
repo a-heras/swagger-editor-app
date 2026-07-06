@@ -77,7 +77,7 @@ export function HistoryList({ items }: HistoryListProps) {
                         </div>
                         <Link
                             href={`/history/${item.id}`}
-                            className="shrink-0 rounded-md border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:text-cyan-300"
+                            className="shrink-0 rounded-md border border-fuchsia-300/40 bg-fuchsia-400/10 px-4 py-2 text-sm font-semibold text-fuchsia-200 shadow-[0_0_18px_rgba(217,70,239,0.15)] transition hover:border-fuchsia-300/70 hover:bg-fuchsia-400/20 hover:text-fuchsia-100"
                         >
                             View details
                         </Link>

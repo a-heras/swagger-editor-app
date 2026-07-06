@@ -39,7 +39,7 @@ export default async function HistoryDetailPage({
 
     return (
         <section className="flex flex-1">
-            <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-10">
+            <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-6 px-6 py-10">
                 <div>
                     <p className="text-sm font-bold uppercase tracking-[0.35em] text-cyan-300">
                         History & Analytics

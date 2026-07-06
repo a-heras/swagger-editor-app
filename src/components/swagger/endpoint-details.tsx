@@ -28,11 +28,11 @@ type CodeBlockProps = {
 
 function CodeBlock({ label, value }: CodeBlockProps) {
     return (
-        <div>
+        <div className="min-w-0 max-w-full">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-200/80">
                 {label}
             </p>
-            <pre className="mt-2 overflow-x-auto rounded-lg border border-cyan-300/10 bg-black/50 p-3 font-mono text-xs leading-relaxed text-cyan-100/85">
+            <pre className="mt-2 max-h-96 w-full max-w-full overflow-auto whitespace-pre-wrap break-words rounded-lg border border-cyan-300/10 bg-black/50 p-3 font-mono text-xs leading-relaxed text-cyan-100/85">
                 {value}
             </pre>
         </div>
