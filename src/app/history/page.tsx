@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 const historyItems: Array<{
     id: string;
@@ -9,7 +11,13 @@ const historyItems: Array<{
     timestamp: string;
 }> = [];
 
-export default function HistoryPage() {
+export default async function HistoryPage() {
+    const cookieStore = await cookies();
+    const authToken = cookieStore.get('auth-token');
+
+    if (!authToken) {
+        redirect('/');
+    }
     return (
         <section className="flex flex-1 bg-slate-50">
             <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-10">
