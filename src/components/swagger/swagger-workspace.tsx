@@ -1,7 +1,9 @@
 'use client';
 
+import { useTransition } from 'react';
 import { useMemo, useState } from 'react';
 
+import { saveSchema } from '@/app/actions/schema';
 import { SchemaEditor } from './schema-editor';
 import { SchemaViewer } from './schema-viewer';
 
@@ -22,8 +24,16 @@ paths:
                     description: Successful response
 `;
 
-export function SwaggerWorkspace() {
-    const [schemaSource, setSchemaSource] = useState(defaultSchema);
+type SwaggerWorkspaceProps = {
+    initialSchema?: string;
+};
+
+export function SwaggerWorkspace({ initialSchema }: SwaggerWorkspaceProps) {
+    const [schemaSource, setSchemaSource] = useState(
+        initialSchema ?? defaultSchema,
+    );
+    const [saveMessage, setSaveMessage] = useState<string>();
+    const [isSaving, startSaving] = useTransition();
 
     const parsedSchema = useMemo(
         () => parseSchema(schemaSource),
@@ -55,14 +65,25 @@ export function SwaggerWorkspace() {
         }
     }
 
+    function handleSaveSchema() {
+        startSaving(async () => {
+            const result = await saveSchema(schemaSource);
+
+            setSaveMessage(result.message);
+        });
+    }
+
     return (
         <div className="grid flex-1 gap-6 landscape:grid-cols-2 portrait:grid-cols-1">
             <SchemaEditor
                 value={schemaSource}
                 format={format}
                 error={error}
+                saveMessage={saveMessage}
+                isSaving={isSaving}
                 onChange={setSchemaSource}
                 onToggleFormat={handleToggleFormat}
+                onSave={handleSaveSchema}
             />
             <SchemaViewer endpoints={endpoints} />
         </div>

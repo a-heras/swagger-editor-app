@@ -1,6 +1,9 @@
+import { loadSavedSchema } from '@/app/actions/schema';
 import { SwaggerWorkspace } from '@/components/swagger/swagger-workspace';
 
-export default function HomePage() {
+export default async function HomePage() {
+    const savedSchema = await loadSavedSchema();
+
     return (
         <section className="flex flex-1 flex-col bg-slate-50">
             <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-8">
@@ -18,7 +21,7 @@ export default function HomePage() {
                     </p>
                 </div>
 
-                <SwaggerWorkspace />
+                <SwaggerWorkspace initialSchema={savedSchema?.content} />
             </div>
         </section>
     );
