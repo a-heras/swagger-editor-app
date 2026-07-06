@@ -1,15 +1,25 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 import { signIn } from '@/app/actions/auth';
 import { AuthForm } from '@/components/auth/auth-form';
 
-export default async function SignInPage() {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('auth-token');
+type SignInPageProps = {
+    searchParams?: Promise<{
+        error?: string;
+        message?: string;
+    }>;
+};
 
-    if (authToken) {
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    const params = await searchParams;
+
+    if (user) {
         redirect('/');
     }
 
@@ -21,6 +31,8 @@ export default async function SignInPage() {
                     description="Sign in to save schemas and access request history."
                     submitLabel="Sign In"
                     action={signIn}
+                    errorMessage={params?.error}
+                    infoMessage={params?.message}
                 />
 
                 <p className="mt-6 text-sm text-slate-600">

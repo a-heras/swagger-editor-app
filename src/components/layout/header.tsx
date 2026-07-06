@@ -1,11 +1,14 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { signOut } from '@/app/actions/auth';
 
 export async function Header() {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('auth-token');
-    const isAuthenticated = Boolean(authToken);
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    const isAuthenticated = Boolean(user);
 
     return (
         <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">

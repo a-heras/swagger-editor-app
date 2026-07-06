@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import {
     hasAuthValidationErrors,
@@ -13,6 +14,8 @@ type AuthFormProps = {
     description: string;
     submitLabel: string;
     action: (formData: FormData) => Promise<void>;
+    errorMessage?: string;
+    infoMessage?: string;
 };
 
 export function AuthForm({
@@ -20,8 +23,22 @@ export function AuthForm({
     description,
     submitLabel,
     action,
+    errorMessage,
+    infoMessage,
 }: AuthFormProps) {
     const [errors, setErrors] = useState<AuthValidationErrors>({});
+    const [visibleErrorMessage] = useState(errorMessage);
+    const [visibleInfoMessage] = useState(infoMessage);
+    const pathname = usePathname();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!visibleErrorMessage && !visibleInfoMessage) {
+            return;
+        }
+
+        router.replace(pathname, { scroll: false });
+    }, [pathname, router, visibleErrorMessage, visibleInfoMessage]);
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         const formData = new FormData(event.currentTarget);
@@ -46,6 +63,18 @@ export function AuthForm({
                 </h1>
                 <p className="mt-3 text-slate-600">{description}</p>
             </div>
+
+            {visibleErrorMessage ? (
+                <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {visibleErrorMessage}
+                </div>
+            ) : null}
+
+            {visibleInfoMessage ? (
+                <div className="mt-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                    {visibleInfoMessage}
+                </div>
+            ) : null}
 
             <form
                 action={action}

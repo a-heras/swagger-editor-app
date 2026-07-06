@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 const historyItems: Array<{
@@ -12,10 +12,12 @@ const historyItems: Array<{
 }> = [];
 
 export default async function HistoryPage() {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('auth-token');
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!authToken) {
+    if (!user) {
         redirect('/');
     }
     return (

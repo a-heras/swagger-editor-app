@@ -1,28 +1,19 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import {
     hasAuthValidationErrors,
     validateAuthForm,
 } from '@/lib/auth/validation';
+import { createClient } from '@/lib/supabase/server';
 
-const authTokenName = 'auth-token';
-
-function createMockAuthToken() {
-    return `mock-token-${Date.now()}`;
-}
-
-async function setAuthToken() {
-    const cookieStore = await cookies();
-
-    cookieStore.set(authTokenName, createMockAuthToken(), {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 60 * 60,
-    });
+function redirectWithMessage(
+    path: '/sign-in' | '/sign-up',
+    type: 'error' | 'message',
+    message: string,
+) {
+    redirect(`${path}?${type}=${encodeURIComponent(message)}`);
 }
 
 export async function signIn(formData: FormData) {
@@ -31,10 +22,22 @@ export async function signIn(formData: FormData) {
     const errors = validateAuthForm(email, password);
 
     if (hasAuthValidationErrors(errors)) {
-        redirect('/sign-in');
+        redirectWithMessage(
+            '/sign-in',
+            'error',
+            'Check email and password requirements.',
+        );
     }
 
-    await setAuthToken();
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+    });
+
+    if (error) {
+        redirectWithMessage('/sign-in', 'error', error.message);
+    }
 
     redirect('/');
 }
@@ -45,18 +48,38 @@ export async function signUp(formData: FormData) {
     const errors = validateAuthForm(email, password);
 
     if (hasAuthValidationErrors(errors)) {
-        redirect('/sign-up');
+        redirectWithMessage(
+            '/sign-up',
+            'error',
+            'Check email and password requirements.',
+        );
     }
 
-    await setAuthToken();
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+    });
+
+    if (error) {
+        redirectWithMessage('/sign-up', 'error', error.message);
+    }
+
+    if (!data.session) {
+        redirectWithMessage(
+            '/sign-in',
+            'message',
+            'Check your email to confirm registration, then sign in.',
+        );
+    }
 
     redirect('/');
 }
 
 export async function signOut() {
-    const cookieStore = await cookies();
+    const supabase = await createClient();
 
-    cookieStore.delete(authTokenName);
+    await supabase.auth.signOut();
 
     redirect('/');
 }

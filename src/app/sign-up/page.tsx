@@ -1,15 +1,25 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 import { signUp } from '@/app/actions/auth';
 import { AuthForm } from '@/components/auth/auth-form';
 
-export default async function SignUpPage() {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('auth-token');
+type SignUpPageProps = {
+    searchParams?: Promise<{
+        error?: string;
+        message?: string;
+    }>;
+};
 
-    if (authToken) {
+export default async function SignUpPage({ searchParams }: SignUpPageProps) {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    const params = await searchParams;
+
+    if (user) {
         redirect('/');
     }
 
@@ -21,6 +31,8 @@ export default async function SignUpPage() {
                     description="Create an account to save schemas and track API requests."
                     submitLabel="Sign Up"
                     action={signUp}
+                    errorMessage={params?.error}
+                    infoMessage={params?.message}
                 />
 
                 <p className="mt-6 text-sm text-slate-600">
