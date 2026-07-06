@@ -5,8 +5,10 @@ import { revalidatePath } from 'next/cache';
 import type {
     RequestHistoryDetail,
     RequestHistoryEntry,
+    RequestHistoryPageResult,
     SaveRequestHistoryInput,
 } from '@/lib/history/types';
+import { HISTORY_PAGE_SIZE } from '@/lib/history/constants';
 import { createClient } from '@/lib/supabase/server';
 
 type RequestHistoryRow = {
@@ -83,15 +85,61 @@ export async function saveRequestHistory(entry: SaveRequestHistoryInput) {
     return { ok: true as const };
 }
 
-export async function loadRequestHistory(): Promise<RequestHistoryEntry[]> {
+export async function loadRequestHistoryPage(
+    page = 1,
+): Promise<RequestHistoryPageResult> {
     const supabase = await createClient();
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
+    const emptyPage: RequestHistoryPageResult = {
+        items: [],
+        page: 1,
+        pageSize: HISTORY_PAGE_SIZE,
+        totalCount: 0,
+        totalPages: 0,
+    };
+
     if (!user) {
-        return [];
+        return emptyPage;
     }
+
+    const safePage = Math.max(1, page);
+
+    const { count, error: countError } = await supabase
+        .from('request_history')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+    if (countError) {
+        console.error(
+            'Failed to load request history count:',
+            countError.message,
+        );
+        return emptyPage;
+    }
+
+    const totalCount = count ?? 0;
+    const totalPages =
+        totalCount === 0 ? 0 : Math.ceil(totalCount / HISTORY_PAGE_SIZE);
+
+    if (totalPages === 0) {
+        return emptyPage;
+    }
+
+    if (safePage > totalPages) {
+        return {
+            items: [],
+            page: safePage,
+            pageSize: HISTORY_PAGE_SIZE,
+            totalCount,
+            totalPages,
+        };
+    }
+
+    const from = (safePage - 1) * HISTORY_PAGE_SIZE;
+    const to = from + HISTORY_PAGE_SIZE - 1;
 
     const { data, error } = await supabase
         .from('request_history')
@@ -99,18 +147,34 @@ export async function loadRequestHistory(): Promise<RequestHistoryEntry[]> {
             'id, method, url, status, duration_ms, request_size, response_size, error_details, created_at',
         )
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
     if (error) {
         console.error('Failed to load request history:', error.message);
-        return [];
+        return {
+            items: [],
+            page: safePage,
+            pageSize: HISTORY_PAGE_SIZE,
+            totalCount,
+            totalPages,
+        };
     }
 
-    if (!data) {
-        return [];
-    }
+    return {
+        items: (data ?? []).map((row) =>
+            mapHistoryEntry(row as RequestHistoryRow),
+        ),
+        page: safePage,
+        pageSize: HISTORY_PAGE_SIZE,
+        totalCount,
+        totalPages,
+    };
+}
 
-    return data.map((row) => mapHistoryEntry(row as RequestHistoryRow));
+export async function loadRequestHistory(): Promise<RequestHistoryEntry[]> {
+    const historyPage = await loadRequestHistoryPage(1);
+    return historyPage.items;
 }
 
 export async function loadRequestHistoryItem(
@@ -139,4 +203,60 @@ export async function loadRequestHistoryItem(
     }
 
     return mapHistoryDetail(data as RequestHistoryRow);
+}
+
+export async function deleteRequestHistoryItem(id: string) {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { ok: false as const, message: 'Sign in to delete history.' };
+    }
+
+    const { error } = await supabase
+        .from('request_history')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+    if (error) {
+        return { ok: false as const, message: error.message };
+    }
+
+    revalidatePath('/history');
+    revalidatePath(`/history/${id}`);
+
+    return { ok: true as const };
+}
+
+export async function deleteRequestHistoryItems(ids: string[]) {
+    if (ids.length === 0) {
+        return { ok: false as const, message: 'No requests selected.' };
+    }
+
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { ok: false as const, message: 'Sign in to delete history.' };
+    }
+
+    const { error } = await supabase
+        .from('request_history')
+        .delete()
+        .in('id', ids)
+        .eq('user_id', user.id);
+
+    if (error) {
+        return { ok: false as const, message: error.message };
+    }
+
+    revalidatePath('/history');
+    ids.forEach((id) => revalidatePath(`/history/${id}`));
+
+    return { ok: true as const, deletedCount: ids.length };
 }

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 import type { RequestHistoryDetail } from '@/lib/history/types';
+import { HistoryDeleteButton } from './history-delete-button';
 
 type HistoryDetailProps = {
     item: RequestHistoryDetail;
@@ -70,12 +71,19 @@ function CodeSection({ label, value }: CodeSectionProps) {
 export function HistoryDetail({ item }: HistoryDetailProps) {
     return (
         <div className="flex min-w-0 flex-col gap-6">
-            <Link
-                href="/history"
-                className="w-fit rounded-md border border-fuchsia-300/40 bg-fuchsia-400/10 px-4 py-2 text-sm font-semibold text-fuchsia-200 shadow-[0_0_18px_rgba(217,70,239,0.15)] transition hover:border-fuchsia-300/70 hover:bg-fuchsia-400/20 hover:text-fuchsia-100"
-            >
-                ← Back to history
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+                <Link
+                    href="/history"
+                    className="w-fit rounded-md border border-fuchsia-300/40 bg-fuchsia-400/10 px-4 py-2 text-sm font-semibold text-fuchsia-200 shadow-[0_0_18px_rgba(217,70,239,0.15)] transition hover:border-fuchsia-300/70 hover:bg-fuchsia-400/20 hover:text-fuchsia-100"
+                >
+                    ← Back to history
+                </Link>
+                <HistoryDeleteButton
+                    id={item.id}
+                    label="Delete request"
+                    redirectToHistory
+                />
+            </div>
 
             <article className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-cyan-300/20 bg-slate-950/70 p-6 shadow-[0_0_35px_rgba(34,211,238,0.12)] backdrop-blur-xl">
                 <div className="flex min-w-0 flex-wrap items-center gap-3">

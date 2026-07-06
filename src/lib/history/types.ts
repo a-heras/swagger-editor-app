@@ -30,3 +30,11 @@ export type SaveRequestHistoryInput = {
     responseHeaders?: Record<string, string>;
     responseBody?: string;
 };
+
+export type RequestHistoryPageResult = {
+    items: RequestHistoryEntry[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+};

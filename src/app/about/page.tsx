@@ -19,7 +19,7 @@ const teamMembers = [
 const resources = [
     {
         label: 'RS School React Course',
-        href: 'https://rs.school/courses/react',
+        href: 'https://rs.school/courses/reactjs',
     },
     {
         label: 'Project Repository',
@@ -71,7 +71,7 @@ export default function AboutPage() {
                         delivery.
                     </p>
                     <a
-                        href="https://rs.school/courses/react"
+                        href="https://rs.school/courses/reactjs"
                         className={`mt-4 ${actionLinkClassName}`}
                         target="_blank"
                         rel="noreferrer"

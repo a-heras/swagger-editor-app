@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 import { redirect } from 'next/navigation';
 
-import { loadRequestHistory } from '@/app/actions/request-history';
+import { loadRequestHistoryPage } from '@/app/actions/request-history';
 import { HistoryLoading } from '@/components/history/history-loading';
 import { createClient } from '@/lib/supabase/server';
 
@@ -12,7 +12,16 @@ const HistoryPanel = dynamic(
     },
 );
 
-export default async function HistoryPage() {
+type HistoryPageProps = {
+    searchParams: Promise<{
+        page?: string;
+    }>;
+};
+
+export default async function HistoryPage({ searchParams }: HistoryPageProps) {
+    const { page: pageParam } = await searchParams;
+    const requestedPage = Math.max(1, Number(pageParam) || 1);
+
     const supabase = await createClient();
     const {
         data: { user },
@@ -22,7 +31,11 @@ export default async function HistoryPage() {
         redirect('/');
     }
 
-    const items = await loadRequestHistory();
+    const historyPage = await loadRequestHistoryPage(requestedPage);
+
+    if (historyPage.totalPages > 0 && requestedPage > historyPage.totalPages) {
+        redirect(`/history?page=${historyPage.totalPages}`);
+    }
 
     return (
         <section className="flex flex-1">
@@ -40,7 +53,7 @@ export default async function HistoryPage() {
                     </p>
                 </div>
 
-                <HistoryPanel items={items} />
+                <HistoryPanel historyPage={historyPage} />
             </div>
         </section>
     );
