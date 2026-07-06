@@ -24,8 +24,8 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
     }
 
     return (
-        <section className="flex flex-1 items-center justify-center bg-slate-50 px-6 py-10">
-            <div>
+        <section className="flex flex-1 items-center justify-center px-6 py-10">
+            <div className="w-full max-w-md">
                 <AuthForm
                     title="Sign Up"
                     description="Create an account to save schemas and track API requests."
@@ -35,11 +35,11 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
                     infoMessage={params?.message}
                 />
 
-                <p className="mt-6 text-sm text-slate-600">
+                <p className="mt-6 text-sm text-cyan-100/65">
                     Already have an account?{' '}
                     <Link
                         href="/sign-in"
-                        className="font-medium text-slate-950 hover:text-slate-600"
+                        className="font-semibold text-cyan-300 hover:text-fuchsia-300"
                     >
                         Sign In
                     </Link>

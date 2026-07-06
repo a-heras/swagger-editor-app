@@ -24,8 +24,8 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
     }
 
     return (
-        <section className="flex flex-1 items-center justify-center bg-slate-50 px-6 py-10">
-            <div>
+        <section className="flex flex-1 items-center justify-center px-6 py-10">
+            <div className="w-full max-w-md">
                 <AuthForm
                     title="Sign In"
                     description="Sign in to save schemas and access request history."
@@ -35,11 +35,11 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                     infoMessage={params?.message}
                 />
 
-                <p className="mt-6 text-sm text-slate-600">
+                <p className="mt-6 text-sm text-cyan-100/65">
                     Don&apos;t have an account?{' '}
                     <Link
                         href="/sign-up"
-                        className="font-medium text-slate-950 hover:text-slate-600"
+                        className="font-semibold text-cyan-300 hover:text-fuchsia-300"
                     >
                         Sign Up
                     </Link>
